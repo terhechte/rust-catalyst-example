@@ -55,3 +55,30 @@ lipo -create -output target/libtest1.a target/{x86_64-apple-darwin,aarch64-apple
 ```
 
 Note that we're not including `x86_64-apple-darwin` because a fat binary cannot contain darwing x86_64 and iOS x86_64 together.
+
+# How it works
+
+Tx86_64-he `x86_64-apple-ios-macabi.json` file contains the information that `Xargo` needs to build a custom sysroot to compile your project with.
+A sysroot is the `libstd`, `libcore` and so on.
+
+## Cargo.toml
+
+The panic line:
+
+``` toml
+[profile.release]
+panic = "abort"
+```
+
+Seems to be required as `panic_unwind` leads to a failing build.
+
+## Xargo.toml
+
+Just copy the contents verbatim. Otherwise it fails to build `libstd`.
+
+``` toml
+std = {features = ["jemalloc"]}
+
+[dependencies]
+std = {}
+```
