@@ -82,3 +82,9 @@ std = {features = ["jemalloc"]}
 [dependencies]
 std = {}
 ```
+
+# XCFrameworks
+
+fat binaries cannot contain multiple slices for the same architectures. That means using simulator x86_64 and macabi x86_64 in one fat binary doesn't work.
+Therefore, we can use a `xcframwork`. This PR adds `xcframework` support, however, there is an error that I don't understand yet.
+
