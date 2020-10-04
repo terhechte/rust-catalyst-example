@@ -4,7 +4,7 @@ use std::env;
 
 fn main() {
     let crate_dir = env::var("CARGO_MANIFEST_DIR").unwrap();
-    let filename = "test1_rust.h";
+    let filename = "XcodeIntegration/XcodeIntegration/Rust/test1_rust.h";
 
     let _build = cbindgen::Builder::new()
         .with_crate(crate_dir)
