@@ -19,7 +19,9 @@ twox-hash = "1.5.0"
 foreign-types = "*"
 libc = "*"
 
+[profile.dev]
+panic = 'unwind'
 
 [profile.release]
-panic = "abort"
+panic = 'unwind'
 
