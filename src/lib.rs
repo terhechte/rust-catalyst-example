@@ -1,30 +1,14 @@
-use std::collections::HashMap;
-use libc::c_char;
+use std::os::raw::c_void;
+use std::slice;
+use std::str;
 
-/// Free a markdown slide buffer.
 #[no_mangle]
-pub unsafe extern "C" fn example(buffer: *mut c_char) {
-    println!("Yeah");
+pub unsafe extern "C" fn example(
+    swift_string: *const c_void,
+    len: usize
+    ) {
+    let bytes: &[u8] = slice::from_raw_parts(swift_string as *mut u8 as _, len);
+    let string = str::from_utf8_unchecked(&bytes);
+    println!("String: {}", &string);
 }
 
-pub fn makeit() {
-    // Type inference lets us omit an explicit type signature (which
-    // would be `HashMap<String, String>` in this example).
-    let mut book_reviews = HashMap::new();
-
-    // Review some books.
-    book_reviews.insert(
-        "Adventures of Huckleberry Finn".to_string(),
-        "My favorite book.".to_string(),
-    );
-
-    println!("{:?}", &book_reviews);
-}
-
-#[cfg(test)]
-mod tests {
-    #[test]
-    fn it_works() {
-        assert_eq!(2 + 2, 4);
-    }
-}

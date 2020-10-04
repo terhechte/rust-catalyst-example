@@ -8,16 +8,12 @@ edition = "2018"
 
 [lib]
 name = "test1"
-crate-type = ["staticlib", "lib"]
+crate-type = ["staticlib"] 
 
 [build-dependencies]
 cbindgen = "*"
 
 [dependencies]
-lazy_static = "1.4.0"
-twox-hash = "1.5.0"
-foreign-types = "*"
-libc = "*"
 
 [profile.dev]
 panic = 'unwind'
