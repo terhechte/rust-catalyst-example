@@ -1,84 +1,69 @@
 # Rust Catalyst Example
 
-This is an example that shows how to build a static library supporting Catalyst from Rust.
+This is an example that shows how to build a static library supporting Mac Catalyst (X86_64 and ARM64) from Rust.
+
+
+# Usage
+
+Until [this PR that adds Catalyst ARM64 support to Rust](https://github.com/rust-lang/rust/pull/77484) is merged, you need to build the Rust compiler. Hence, jump to the end to see how to build and use a custom Rust toolchain based on 77484.
+
+This repo contains an Xcode project that sets up everything to include a library written in Rust and call functions in it. The repo is set up to use ARM64 and X86_64 Catalyst. It should compile fine if you select the `My Mac` target. If you select the `Any Mac` target, it requires the above mentioned PR / a custom toolchain.
+
+The Xcode project also contains all the required binaries to try this out immediately. You can just open `XcodeIntegration.xcodeproj` and build.
+
+# Usage with normal nightly Rust
+
 
 ## Requirements
 
-1. [Xargo](https://github.com/japaric/xargo)
-2. Rust Nightly
-3. Rust Source (after switching to nightly)
-4. Xcode 11+
-
-## Not Required
-- the `XARGO_RUST_SRC` env variable
+1. Rustup / Rust Nightly
+2. Xcode 12
 
 ## Full Local Installation
 
 ``` bash
-cargo install xargo
 rustup toolchain install nightly
 rustup toolchain default nightly
+rustup target add aarch64-apple-ios
+rustup target add x86_64-apple-ios
 
 # Or use a directory override
 rustup override set nightly
+
+./make_fat.sh
 ```
 
-## Using It
+It will automatically generate the binaries and write them to `XcodeIntegration/Rust`
 
-Just do a release build with the correct target
+Open Xcode, hit compile.
 
-``` bash
-xargo build --target x86_64-apple-ios-macabi --release
+### build-std
+
+Catalyst is not a tier 1 Rust platform, so there is no pre-build standard library. This repository uses `cargo build-std` to automatically build the standard library for the given platform. This takes a bit longer but works reliably (at least for me).
+
+## Custom Rust Toolchain
+
+```
+git clone https://github.com/rust-lang/rust.git
+cd rust
+cp config.toml.sample config.toml
 ```
 
-## Caveats
-
-- Building for other archs (such as the host arch) also requires setting the target.
-- Non-Release builds fail on some targets
-- Lipo can be used to make a fat binary (see below)
-
-## Fat Binary
-
-This requires that the correct targets are installed for non-macabi:
-
-``` bash
-rustup target add aarch64-apple-ios
+Edit config.toml and change `build-stage = 1` to `build-stage = 2` (line 149)
+                                                 
+```                             
+./x.py build 
+```                        
+             
+Install with
+```
+rustup toolchain link myrust ~/rust/build/x86_64-apple-darwin/stage2/
 ```
 
-Then the following will generate a fat binary. You can also just call the `make_fat.sh` included in the example project.
-
-``` bash
-# lipo together the different architectures into a universal 'fat' file
-xargo build --target x86_64-apple-ios-macabi --release
-xargo build --target aarch64-apple-ios --release
-lipo -create -output target/libtest1.a target/{x86_64-apple-darwin,aarch64-apple-ios,x86_64-apple-darwin}/release/libtest1.a
+Go back to this directory
+```
+rustup default myrust
 ```
 
-Note that we're not including `x86_64-apple-darwin` because a fat binary cannot contain darwing x86_64 and iOS x86_64 together.
+Now you can continue with (Full Local Installation) above.
 
-# How it works
-
-Tx86_64-he `x86_64-apple-ios-macabi.json` file contains the information that `Xargo` needs to build a custom sysroot to compile your project with.
-A sysroot is the `libstd`, `libcore` and so on.
-
-## Cargo.toml
-
-The panic line:
-
-``` toml
-[profile.release]
-panic = "abort"
-```
-
-Seems to be required as `panic_unwind` leads to a failing build.
-
-## Xargo.toml
-
-Just copy the contents verbatim. Otherwise it fails to build `libstd`.
-
-``` toml
-std = {features = ["jemalloc"]}
-
-[dependencies]
-std = {}
-```
