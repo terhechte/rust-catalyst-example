@@ -22,7 +22,7 @@ cargo +nightly build -Z build-std --target x86_64-apple-ios-macabi --release > /
 
 # ARM64 Catalyst
 echo "Building for Mac Catalyst ARM64..."
-cargo +myrust build -Z build-std --target aarch64-apple-ios-macabi --release > /dev/null 2>&1
+cargo +nightly build -Z build-std --target aarch64-apple-ios-macabi --release > /dev/null 2>&1
 
 # iOS
 echo "Building for ARM iOS..."
